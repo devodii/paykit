@@ -95,11 +95,13 @@ program
     const devAppPath = path.join(__dirname, 'dev-app');
     const nodeModulesPath = path.join(devAppPath, 'node_modules');
 
-    // Check if dependencies are installed
-    if (!existsSync(nodeModulesPath)) {
+    // Check if dependencies are installed or if package.json has been updated
+    const forceReinstall = !existsSync(nodeModulesPath);
+
+    if (forceReinstall) {
       logger.progress('Installing development dependencies (first time setup)...');
 
-      // Clean up any existing lockfiles to avoid conflicts
+      // Clean up any existing lockfiles and node_modules to avoid conflicts
       const lockfiles = [path.join(devAppPath, 'package-lock.json'), path.join(devAppPath, 'yarn.lock'), path.join(devAppPath, 'pnpm-lock.yaml')];
 
       for (const lockfile of lockfiles) {
@@ -114,7 +116,7 @@ program
       }
 
       // Install dependencies with --no-package-lock to avoid creating a new lockfile
-      const installProcess = spawn('npm', ['install', '--production', '--no-package-lock'], {
+      const installProcess = spawn('npm', ['install', '--no-package-lock'], {
         cwd: devAppPath,
         stdio: 'ignore', // Completely silence npm output to avoid interference
       });
